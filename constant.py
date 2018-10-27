@@ -14,3 +14,8 @@ SOBEL_FILTER = 'Sobel filter'
 SHARP_CUT_FILTER = 'High-definition sharp-cut filter'
 GAUSSIAN_BLUR_FILTER = 'Gaussian blur filter'
 WEAVE_MASKS = 'Weave masks'
+
+# Color model
+R = 'R'
+G = 'G'
+B = 'B'

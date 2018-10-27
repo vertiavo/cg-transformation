@@ -3,8 +3,9 @@ from tkinter import Button, Checkbutton, Frame, IntVar, LEFT, Label, Menu, Tk, s
 
 from PIL import Image, ImageTk
 
-from constant import ADD, BRIGHTNESS, DIVISION, GAUSSIAN_BLUR_FILTER, GREYSCALE_1, GREYSCALE_2, MEDIAN_FILTER, \
-    MULTIPLICATION, SHARP_CUT_FILTER, SMOOTHING_FILTER, SOBEL_FILTER, SUBTRACTION, WEAVE_MASKS
+from constant import ADD, B, BRIGHTNESS, DIVISION, G, GAUSSIAN_BLUR_FILTER, GREYSCALE_1, GREYSCALE_2, MEDIAN_FILTER, \
+    MULTIPLICATION, R, SHARP_CUT_FILTER, SMOOTHING_FILTER, SOBEL_FILTER, SUBTRACTION, WEAVE_MASKS
+from operation import add_operation, brightness_operation, divide_operation, multiply_operation, subtract_operation
 
 
 def load_file():
@@ -72,9 +73,9 @@ class Transformation:
 
         checkbox_panel = Frame(main_frame)
         checkbox_panel.grid(row=2, column=1)
-        Checkbutton(checkbox_panel, text='R', variable=self.red_channel_enabled).pack()
-        Checkbutton(checkbox_panel, text='G', variable=self.green_channel_enabled).pack()
-        Checkbutton(checkbox_panel, text='B', variable=self.blue_channel_enabled).pack()
+        Checkbutton(checkbox_panel, text=R, variable=self.red_channel_enabled).pack()
+        Checkbutton(checkbox_panel, text=G, variable=self.green_channel_enabled).pack()
+        Checkbutton(checkbox_panel, text=B, variable=self.blue_channel_enabled).pack()
 
         modified_picture_panel = Frame(main_frame)
         modified_picture_panel.grid(row=2, column=2)
@@ -123,56 +124,28 @@ class Transformation:
             self.modified_label.image = photo_copy  # keep a reference!
 
     def make_operation(self, title, value, rgb):
-        (r, g, b) = rgb
         red_channel_enabled_get = self.red_channel_enabled.get()
         green_channel_enabled_get = self.green_channel_enabled.get()
         blue_channel_enabled_get = self.blue_channel_enabled.get()
 
         if title == ADD:
-            if red_channel_enabled_get == 1:
-                r = 255 if r + value > 255 else r + value
-            if green_channel_enabled_get == 1:
-                g = 255 if g + value > 255 else g + value
-            if blue_channel_enabled_get == 1:
-                b = 255 if b + value > 255 else b + value
+            rgb = add_operation(rgb, blue_channel_enabled_get, green_channel_enabled_get, red_channel_enabled_get,
+                                value)
         elif title == SUBTRACTION:
-            if red_channel_enabled_get == 1:
-                r = 0 if r - value < 0 else r - value
-            if green_channel_enabled_get == 1:
-                g = 0 if g - value < 0 else g - value
-            if blue_channel_enabled_get == 1:
-                b = 0 if b - value < 0 else b - value
+            rgb = subtract_operation(rgb, blue_channel_enabled_get, green_channel_enabled_get, red_channel_enabled_get,
+                                     value)
         elif title == MULTIPLICATION:
-            if red_channel_enabled_get == 1:
-                r = 255 if r * value > 255 else r * value
-            if green_channel_enabled_get == 1:
-                g = 255 if g * value > 255 else g * value
-            if blue_channel_enabled_get == 1:
-                b = 255 if b * value > 255 else b * value
+            rgb = multiply_operation(rgb, blue_channel_enabled_get, green_channel_enabled_get, red_channel_enabled_get,
+                                     value)
         elif title == DIVISION:
-            if red_channel_enabled_get == 1:
-                r = 0 if value == 0 else int(r / value)
-            if green_channel_enabled_get == 1:
-                g = 0 if value == 0 else int(g / value)
-            if blue_channel_enabled_get == 1:
-                b = 0 if value == 0 else int(b / value)
+            rgb = divide_operation(rgb, blue_channel_enabled_get, green_channel_enabled_get, red_channel_enabled_get,
+                                   value)
         elif title == BRIGHTNESS:
-            if value > 0:
-                r = 255 if r + value > 255 else r + value
-                g = 255 if g + value > 255 else g + value
-                b = 255 if b + value > 255 else b + value
-            else:
-                r = 0 if r + value < 0 else r + value
-                g = 0 if g + value < 0 else g + value
-                b = 0 if b + value < 0 else b + value
-        elif title == GREYSCALE_1:
-            r = 255 if r + value > 255 else r + value
-            g = 255 if g + value > 255 else g + value
-            b = 255 if b + value > 255 else b + value
+            rgb = brightness_operation(rgb, value)
         else:
             print('Operation not implemented!')
 
-        return r, g, b
+        return rgb
 
     def change_to_simple_greyscale(self):
         pixels = self.image_copy.load()
