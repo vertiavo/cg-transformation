@@ -1,3 +1,4 @@
+import copy
 import sys
 from tkinter import Button, Checkbutton, Frame, IntVar, LEFT, Label, Menu, Tk, simpledialog
 
@@ -14,12 +15,6 @@ def load_file():
 
 def save_file():
     print('Save file')
-
-
-def reset(image, modified_label):
-    photo_copy = ImageTk.PhotoImage(image)
-    modified_label.config(image=photo_copy)
-    modified_label.image = photo_copy  # keep a reference!
 
 
 def create_button(root, text, action=None):
@@ -44,7 +39,7 @@ class Transformation:
         sub_menu_file.add_separator()
         sub_menu_file.add_command(label='Exit', command=sys.exit)
 
-        menu.add_command(label='Reset', command=lambda: reset(self.image, self.modified_label))
+        menu.add_command(label='Reset', command=self.reset)
 
         main_frame = Frame(master)
         main_frame.pack()
@@ -108,6 +103,12 @@ class Transformation:
         create_button(self.enhance_panel, SHARP_CUT_FILTER)
         create_button(self.enhance_panel, GAUSSIAN_BLUR_FILTER)
         create_button(self.enhance_panel, WEAVE_MASKS)
+
+    def reset(self):
+        self.image_copy = copy.copy(self.image)
+        photo_copy = ImageTk.PhotoImage(self.image)
+        self.modified_label.config(image=photo_copy)
+        self.modified_label.image = photo_copy  # keep a reference!
 
     def perform_point_transform(self, title, parent, min_value=0, max_value=255):
         value = ask_for_value(title, parent, min_value, max_value)
