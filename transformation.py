@@ -1,6 +1,6 @@
 import copy
 import sys
-from tkinter import Button, Checkbutton, Frame, IntVar, LEFT, Label, Menu, Tk, simpledialog
+from tkinter import Button, Checkbutton, Frame, IntVar, LEFT, Label, Menu, Tk, filedialog, messagebox, simpledialog
 
 from PIL import Image, ImageTk
 
@@ -9,12 +9,8 @@ from constant import ADD, B, BRIGHTNESS, DIVISION, G, GAUSSIAN_BLUR_FILTER, GREY
 from operation import add_operation, brightness_operation, divide_operation, multiply_operation, subtract_operation
 
 
-def load_file():
-    print('Load file')
-
-
-def save_file():
-    print('Save file')
+def get_filename():
+    return filedialog.askopenfilename()
 
 
 def create_button(root, text, action=None):
@@ -27,6 +23,7 @@ def ask_for_value(title, parent, min_value=0, max_value=255):
 
 
 class Transformation:
+    DEFAULT_PICTURE = 'pictures/lena.jpg'
 
     def __init__(self, master):
         menu = Menu(master)
@@ -34,8 +31,7 @@ class Transformation:
 
         sub_menu_file = Menu(menu)
         menu.add_cascade(label='File', menu=sub_menu_file)
-        sub_menu_file.add_command(label='Load', command=load_file)
-        sub_menu_file.add_command(label='Save', command=save_file)
+        sub_menu_file.add_command(label='Load', command=self.load_file)
         sub_menu_file.add_separator()
         sub_menu_file.add_command(label='Exit', command=sys.exit)
 
@@ -59,7 +55,7 @@ class Transformation:
         original_picture_panel = Frame(main_frame)
         original_picture_panel.grid(row=2, column=0)
 
-        self.image = Image.open('pictures/lena.jpg').resize((300, 300))
+        self.image = Image.open(self.DEFAULT_PICTURE).resize((300, 300))
         photo = ImageTk.PhotoImage(self.image)
 
         self.original_label = Label(original_picture_panel, image=photo)
@@ -75,12 +71,26 @@ class Transformation:
         modified_picture_panel = Frame(main_frame)
         modified_picture_panel.grid(row=2, column=2)
 
-        self.image_copy = Image.open('pictures/lena.jpg').resize((300, 300))
+        self.image_copy = Image.open(self.DEFAULT_PICTURE).resize((300, 300))
         photo_copy = ImageTk.PhotoImage(self.image_copy)
 
         self.modified_label = Label(modified_picture_panel, image=photo_copy)
         self.modified_label.image = photo_copy  # keep a reference!
         self.modified_label.pack()
+
+    def load_file(self):
+        filename = get_filename()
+
+        if filename.lower().endswith(('.png', 'jpg', 'jpeg')):
+            self.image = Image.open(filename).resize((300, 300))
+            photo = ImageTk.PhotoImage(self.image)
+
+            self.original_label.config(image=photo)
+            self.original_label.image = photo  # keep a reference!
+
+            self.reset()
+        else:
+            messagebox.showerror('Error', 'Invalid format')
 
     def create_point_transform_panel(self):
         create_button(self.point_transform_panel, ADD,
